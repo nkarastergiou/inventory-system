@@ -41,6 +41,66 @@
 
     <div id="alertBox"></div>
 
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Add New Product</h5>
+        </div>
+
+        <div class="card-body">
+            <form id="addProductForm">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="name" class="form-label">Product Name</label>
+                        <input type="text" class="form-control" id="name" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="sku" class="form-label">SKU</label>
+                        <input type="text" class="form-control" id="sku" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="price" class="form-label">Price</label>
+                        <input type="number" class="form-control" id="price" step="0.01" min="0" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="category_id" class="form-label">Category</label>
+                        <select class="form-select" id="category_id" required>
+                            <option value="">Loading categories...</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="supplier_id" class="form-label">Supplier</label>
+                        <select class="form-select" id="supplier_id" required>
+                            <option value="">Loading suppliers...</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+                        <label for="quantity" class="form-label">Quantity</label>
+                        <input type="number" class="form-control" id="quantity" min="0" required>
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+                        <label for="min_stock" class="form-label">Min Stock</label>
+                        <input type="number" class="form-control" id="min_stock" min="0" value="5" required>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-dark">
+                    Add Product
+                </button>
+            </form>
+        </div>
+    </div>
+
     <div class="card shadow-sm">
         <div class="card-header bg-white">
             <h5 class="mb-0">Products</h5>
@@ -74,6 +134,7 @@
 
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>

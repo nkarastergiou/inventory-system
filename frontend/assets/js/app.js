@@ -1,12 +1,19 @@
-const API_URL = 'http://localhost:8080/api/products';
+const PRODUCTS_API_URL = 'http://localhost:8080/api/products';
+const CATEGORIES_API_URL = 'http://localhost:8080/api/categories';
+const SUPPLIERS_API_URL = 'http://localhost:8080/api/suppliers';
 
 document.addEventListener('DOMContentLoaded', () => {
     loadProducts();
+    loadCategories();
+    loadSuppliers();
+
+    const addProductForm = document.getElementById('addProductForm');
+    addProductForm.addEventListener('submit', handleAddProduct);
 });
 
 async function loadProducts() {
     try {
-        const response = await fetch(API_URL);
+        const response = await fetch(PRODUCTS_API_URL);
 
         if (!response.ok) {
             throw new Error('Failed to fetch products');
@@ -20,6 +27,87 @@ async function loadProducts() {
 
     } catch (error) {
         showError('Could not load products from API.');
+        console.error(error);
+    }
+}
+
+async function loadCategories() {
+    try {
+        const response = await fetch(CATEGORIES_API_URL);
+        const data = await response.json();
+
+        const categorySelect = document.getElementById('category_id');
+        categorySelect.innerHTML = '<option value="">Select category</option>';
+
+        data.categories.forEach(category => {
+            categorySelect.innerHTML += `
+                <option value="${category.id}">${category.name}</option>
+            `;
+        });
+
+    } catch (error) {
+        showError('Could not load categories.');
+        console.error(error);
+    }
+}
+
+async function loadSuppliers() {
+    try {
+        const response = await fetch(SUPPLIERS_API_URL);
+        const data = await response.json();
+
+        const supplierSelect = document.getElementById('supplier_id');
+        supplierSelect.innerHTML = '<option value="">Select supplier</option>';
+
+        data.suppliers.forEach(supplier => {
+            supplierSelect.innerHTML += `
+                <option value="${supplier.id}">${supplier.name}</option>
+            `;
+        });
+
+    } catch (error) {
+        showError('Could not load suppliers.');
+        console.error(error);
+    }
+}
+
+async function handleAddProduct(event) {
+    event.preventDefault();
+
+    const product = {
+        name: document.getElementById('name').value.trim(),
+        sku: document.getElementById('sku').value.trim(),
+        description: document.getElementById('description').value.trim(),
+        category_id: document.getElementById('category_id').value,
+        supplier_id: document.getElementById('supplier_id').value,
+        quantity: document.getElementById('quantity').value,
+        min_stock: document.getElementById('min_stock').value,
+        price: document.getElementById('price').value
+    };
+
+    try {
+        const response = await fetch(PRODUCTS_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(product)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to add product');
+        }
+
+        showSuccess('Product added successfully.');
+        document.getElementById('addProductForm').reset();
+        document.getElementById('min_stock').value = 5;
+
+        loadProducts();
+
+    } catch (error) {
+        showError(error.message);
         console.error(error);
     }
 }
@@ -65,12 +153,24 @@ function renderProductsTable(products) {
     });
 }
 
+function showSuccess(message) {
+    const alertBox = document.getElementById('alertBox');
+
+    alertBox.innerHTML = `
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+}
+
 function showError(message) {
     const alertBox = document.getElementById('alertBox');
 
     alertBox.innerHTML = `
-        <div class="alert alert-danger">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
             ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     `;
 }
