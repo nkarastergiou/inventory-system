@@ -118,4 +118,146 @@ $app->get('/api/products', function ($request, $response) {
     }
 });
 
+$app->options('/{routes:.+}', function ($request, $response) {
+    return $response;
+});
+
+$app->get('/api/categories', function ($request, $response) {
+    try {
+        $pdo = getDatabaseConnection();
+
+        $stmt = $pdo->query('SELECT id, name FROM categories ORDER BY name ASC');
+        $categories = $stmt->fetchAll();
+
+        $data = [
+            'status' => 'ok',
+            'categories' => $categories
+        ];
+
+        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200);
+
+    } catch (Exception $e) {
+        $data = [
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ];
+
+        $response->getBody()->write(json_encode($data));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(500);
+    }
+});
+
+$app->get('/api/suppliers', function ($request, $response) {
+    try {
+        $pdo = getDatabaseConnection();
+
+        $stmt = $pdo->query('SELECT id, name FROM suppliers ORDER BY name ASC');
+        $suppliers = $stmt->fetchAll();
+
+        $data = [
+            'status' => 'ok',
+            'suppliers' => $suppliers
+        ];
+
+        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200);
+
+    } catch (Exception $e) {
+        $data = [
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ];
+
+        $response->getBody()->write(json_encode($data));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(500);
+    }
+});
+
+$app->post('/api/products', function ($request, $response) {
+    try {
+        $pdo = getDatabaseConnection();
+
+        $body = $request->getParsedBody();
+
+        $name = trim($body['name'] ?? '');
+        $sku = trim($body['sku'] ?? '');
+        $description = trim($body['description'] ?? '');
+        $categoryId = $body['category_id'] ?? null;
+        $supplierId = $body['supplier_id'] ?? null;
+        $quantity = $body['quantity'] ?? 0;
+        $minStock = $body['min_stock'] ?? 5;
+        $price = $body['price'] ?? 0;
+
+        if ($name === '' || $sku === '') {
+            $data = [
+                'status' => 'error',
+                'message' => 'Name and SKU are required'
+            ];
+
+            $response->getBody()->write(json_encode($data));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400);
+        }
+
+        $sql = "
+            INSERT INTO products 
+            (category_id, supplier_id, name, sku, description, quantity, min_stock, price)
+            VALUES
+            (:category_id, :supplier_id, :name, :sku, :description, :quantity, :min_stock, :price)
+        ";
+
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->execute([
+            ':category_id' => $categoryId,
+            ':supplier_id' => $supplierId,
+            ':name' => $name,
+            ':sku' => $sku,
+            ':description' => $description,
+            ':quantity' => $quantity,
+            ':min_stock' => $minStock,
+            ':price' => $price
+        ]);
+
+        $data = [
+            'status' => 'ok',
+            'message' => 'Product created successfully',
+            'product_id' => $pdo->lastInsertId()
+        ];
+
+        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(201);
+
+    } catch (PDOException $e) {
+        $data = [
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ];
+
+        $response->getBody()->write(json_encode($data));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(500);
+    }
+});
+
 $app->run();
