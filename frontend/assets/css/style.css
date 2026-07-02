@@ -471,3 +471,15 @@ html {
     padding: 16px;
     color: #6b7280;
 }
+.btn-export {
+    background: #eef2ff;
+    color: #3730a3;
+    border: 1px solid #c7d2fe;
+    font-weight: 800;
+}
+
+.btn-export:hover {
+    background: #4f46e5;
+    color: #ffffff;
+    border-color: #4f46e5;
+}

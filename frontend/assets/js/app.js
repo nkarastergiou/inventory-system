@@ -4,6 +4,7 @@ const SUPPLIERS_API_URL = 'http://localhost:8080/api/suppliers';
 const STOCK_MOVEMENTS_API_URL = 'http://localhost:8080/api/stock-movements';
 
 let currentProducts = [];
+let currentMovements = [];
 let editingProductId = null;
 let categoryChart = null;
 let movementsChart = null;
@@ -23,6 +24,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('input', handleSearchProducts);
+
+    const exportProductsBtn = document.getElementById('exportProductsBtn');
+    exportProductsBtn.addEventListener('click', exportProductsToCSV);
+
+    const exportMovementsBtn = document.getElementById('exportMovementsBtn');
+    exportMovementsBtn.addEventListener('click', exportMovementsToCSV);
+
+
 });
 
 function setupSidebarNavigation() {
@@ -447,6 +456,8 @@ async function loadStockMovements() {
         }
 
         const data = await response.json();
+        currentMovements = data.movements;
+
         renderStockMovementsTable(data.movements);
         renderMovementsChart(data.movements);
         renderRecentActivity(data.movements);
@@ -695,6 +706,121 @@ function renderRecentActivity(movements) {
 
         activityList.innerHTML += item;
     });
+}
+
+function exportProductsToCSV() {
+    if (currentProducts.length === 0) {
+        showError('No products available to export.');
+        return;
+    }
+
+    const headers = [
+        'ID',
+        'Name',
+        'SKU',
+        'Category',
+        'Supplier',
+        'Quantity',
+        'Min Stock',
+        'Price',
+        'Status'
+    ];
+
+    const rows = currentProducts.map(product => {
+        const status = Number(product.quantity) <= Number(product.min_stock)
+            ? 'Low Stock'
+            : 'In Stock';
+
+        return [
+            product.id,
+            product.name,
+            product.sku,
+            product.category_name ?? '',
+            product.supplier_name ?? '',
+            product.quantity,
+            product.min_stock,
+            product.price,
+            status
+        ];
+    });
+
+    downloadCSV('products_export.csv', headers, rows);
+    showSuccess('Products CSV exported successfully.');
+}
+
+function exportMovementsToCSV() {
+    if (currentMovements.length === 0) {
+        showError('No stock movements available to export.');
+        return;
+    }
+
+    const headers = [
+        'ID',
+        'Date',
+        'Product',
+        'SKU',
+        'Type',
+        'Quantity',
+        'Note'
+    ];
+
+    const rows = currentMovements.map(movement => {
+        return [
+            movement.id,
+            movement.created_at,
+            movement.product_name,
+            movement.sku,
+            movement.movement_type,
+            movement.quantity,
+            movement.note ?? ''
+        ];
+    });
+
+    downloadCSV('stock_movements_export.csv', headers, rows);
+    showSuccess('Stock movements CSV exported successfully.');
+}
+
+function downloadCSV(filename, headers, rows) {
+    const csvContent = [
+        headers,
+        ...rows
+    ]
+        .map(row => row.map(escapeCSVValue).join(','))
+        .join('\n');
+
+    const blob = new Blob([csvContent], {
+        type: 'text/csv;charset=utf-8;'
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+}
+
+function escapeCSVValue(value) {
+    if (value === null || value === undefined) {
+        return '';
+    }
+
+    const stringValue = String(value).replace(/"/g, '""');
+
+    if (
+        stringValue.includes(',') ||
+        stringValue.includes('"') ||
+        stringValue.includes('\n')
+    ) {
+        return `"${stringValue}"`;
+    }
+
+    return stringValue;
 }
 
 function showSuccess(message) {
