@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const cancelEditBtn = document.getElementById('cancelEditBtn');
     cancelEditBtn.addEventListener('click', resetProductForm);
+    
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', handleSearchProducts);
 });
 
 async function loadProducts() {
@@ -165,6 +168,33 @@ function resetProductForm() {
     document.getElementById('cancelEditBtn').classList.add('d-none');
 }
 
+function handleSearchProducts() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+
+    const filteredProducts = currentProducts.filter(product => {
+        const name = String(product.name ?? '').toLowerCase();
+        const sku = String(product.sku ?? '').toLowerCase();
+        const category = String(product.category_name ?? '').toLowerCase();
+        const supplier = String(product.supplier_name ?? '').toLowerCase();
+
+        if (searchTerm.length <= 2) {
+            return (
+                name.includes(searchTerm) ||
+                sku.includes(searchTerm)
+            );
+        }
+
+        return (
+            name.includes(searchTerm) ||
+            sku.includes(searchTerm) ||
+            category.includes(searchTerm) ||
+            supplier.includes(searchTerm)
+        );
+    });
+
+    renderProductsTable(filteredProducts);
+}
+
 async function deleteProduct(productId) {
     const confirmed = confirm('Are you sure you want to delete this product?');
 
@@ -205,6 +235,9 @@ function renderStats(products) {
 
 function renderProductsTable(products) {
     const tableBody = document.getElementById('productsTableBody');
+    const productsCountText = document.getElementById('productsCountText');
+    
+    productsCountText.textContent = `Showing ${products.length} product${products.length === 1 ? '' : 's'}`;
 
     tableBody.innerHTML = '';
 
