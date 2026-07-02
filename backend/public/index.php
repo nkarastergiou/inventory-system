@@ -5,6 +5,21 @@ require __DIR__ . '/../src/config/database.php';
 
 use Slim\Factory\AppFactory;
 
+function getBearerTokenFromRequest($request): ?string
+{
+    $authorizationHeader = $request->getHeaderLine('Authorization');
+
+    if (!$authorizationHeader) {
+        return null;
+    }
+
+    if (preg_match('/Bearer\s+(.*)$/i', $authorizationHeader, $matches)) {
+        return trim($matches[1]);
+    }
+
+    return null;
+}
+
 $app = AppFactory::create();
 
 $app->addBodyParsingMiddleware();
@@ -587,6 +602,209 @@ $app->get('/api/stock-movements', function ($request, $response) {
         $data = [
             'status' => 'ok',
             'movements' => $movements
+        ];
+
+        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200);
+
+    } catch (Exception $e) {
+        $data = [
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ];
+
+        $response->getBody()->write(json_encode($data));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(500);
+    }
+});
+
+$app->post('/api/login', function ($request, $response) {
+    try {
+        $pdo = getDatabaseConnection();
+
+        $body = $request->getParsedBody();
+
+        $email = trim($body['email'] ?? '');
+        $password = $body['password'] ?? '';
+
+        if ($email === '' || $password === '') {
+            $data = [
+                'status' => 'error',
+                'message' => 'Email and password are required'
+            ];
+
+            $response->getBody()->write(json_encode($data));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400);
+        }
+
+        $stmt = $pdo->prepare('SELECT id, name, email, password_hash FROM users WHERE email = :email');
+        $stmt->execute([':email' => $email]);
+        $user = $stmt->fetch();
+
+        if (!$user || !password_verify($password, $user['password_hash'])) {
+            $data = [
+                'status' => 'error',
+                'message' => 'Invalid email or password'
+            ];
+
+            $response->getBody()->write(json_encode($data));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(401);
+        }
+
+        $token = bin2hex(random_bytes(32));
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+1 day'));
+
+        $tokenStmt = $pdo->prepare("
+            INSERT INTO auth_tokens (user_id, token, expires_at)
+            VALUES (:user_id, :token, :expires_at)
+        ");
+
+        $tokenStmt->execute([
+            ':user_id' => $user['id'],
+            ':token' => $token,
+            ':expires_at' => $expiresAt
+        ]);
+
+        $data = [
+            'status' => 'ok',
+            'message' => 'Login successful',
+            'token' => $token,
+            'user' => [
+                'id' => $user['id'],
+                'name' => $user['name'],
+                'email' => $user['email']
+            ]
+        ];
+
+        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200);
+
+    } catch (Exception $e) {
+        $data = [
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ];
+
+        $response->getBody()->write(json_encode($data));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(500);
+    }
+});
+
+$app->get('/api/me', function ($request, $response) {
+    try {
+        $pdo = getDatabaseConnection();
+
+        $token = getBearerTokenFromRequest($request);
+
+        if (!$token) {
+            $data = [
+                'status' => 'error',
+                'message' => 'Missing authentication token'
+            ];
+
+            $response->getBody()->write(json_encode($data));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(401);
+        }
+
+        $stmt = $pdo->prepare("
+            SELECT 
+                users.id,
+                users.name,
+                users.email
+            FROM auth_tokens
+            INNER JOIN users ON auth_tokens.user_id = users.id
+            WHERE auth_tokens.token = :token
+              AND (auth_tokens.expires_at IS NULL OR auth_tokens.expires_at > NOW())
+            LIMIT 1
+        ");
+
+        $stmt->execute([':token' => $token]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            $data = [
+                'status' => 'error',
+                'message' => 'Invalid or expired token'
+            ];
+
+            $response->getBody()->write(json_encode($data));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(401);
+        }
+
+        $data = [
+            'status' => 'ok',
+            'user' => $user
+        ];
+
+        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200);
+
+    } catch (Exception $e) {
+        $data = [
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ];
+
+        $response->getBody()->write(json_encode($data));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(500);
+    }
+});
+
+$app->post('/api/logout', function ($request, $response) {
+    try {
+        $pdo = getDatabaseConnection();
+
+        $token = getBearerTokenFromRequest($request);
+
+        if (!$token) {
+            $data = [
+                'status' => 'error',
+                'message' => 'Missing authentication token'
+            ];
+
+            $response->getBody()->write(json_encode($data));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(401);
+        }
+
+        $stmt = $pdo->prepare('DELETE FROM auth_tokens WHERE token = :token');
+        $stmt->execute([':token' => $token]);
+
+        $data = [
+            'status' => 'ok',
+            'message' => 'Logout successful'
         ];
 
         $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));

@@ -23,7 +23,7 @@ INSERT INTO users (name, email, password_hash)
 SELECT 
     'Admin User',
     'admin@example.com',
-    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi'
+    '$2y$10$RwpYdxjrQXJQ.oy76/hH5.8GSwJiRXIfCPyTIIr8l9KFQQST8oPr2'
 WHERE NOT EXISTS (
     SELECT 1 FROM users WHERE email = 'admin@example.com'
 );
