@@ -260,4 +260,68 @@ $app->post('/api/products', function ($request, $response) {
     }
 });
 
+$app->delete('/api/products/{id}', function ($request, $response, $args) {
+    try {
+        $pdo = getDatabaseConnection();
+
+        $id = (int) $args['id'];
+
+        if ($id <= 0) {
+            $data = [
+                'status' => 'error',
+                'message' => 'Invalid product ID'
+            ];
+
+            $response->getBody()->write(json_encode($data));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400);
+        }
+
+        $checkStmt = $pdo->prepare('SELECT id FROM products WHERE id = :id');
+        $checkStmt->execute([':id' => $id]);
+        $product = $checkStmt->fetch();
+
+        if (!$product) {
+            $data = [
+                'status' => 'error',
+                'message' => 'Product not found'
+            ];
+
+            $response->getBody()->write(json_encode($data));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);
+        }
+
+        $deleteStmt = $pdo->prepare('DELETE FROM products WHERE id = :id');
+        $deleteStmt->execute([':id' => $id]);
+
+        $data = [
+            'status' => 'ok',
+            'message' => 'Product deleted successfully'
+        ];
+
+        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200);
+
+    } catch (PDOException $e) {
+        $data = [
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ];
+
+        $response->getBody()->write(json_encode($data));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(500);
+    }
+});
+
 $app->run();
