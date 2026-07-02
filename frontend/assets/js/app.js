@@ -507,6 +507,7 @@ function renderCategoryChart(products) {
 
     const labels = Object.keys(categoryCounts);
     const values = Object.values(categoryCounts);
+    renderCategoryChartSummary(categoryCounts);
 
     const ctx = document.getElementById('categoryChart');
 
@@ -565,6 +566,11 @@ function renderMovementsChart(movements) {
 
     const stockInCount = movements.filter(movement => movement.movement_type === 'in').length;
     const stockOutCount = movements.filter(movement => movement.movement_type === 'out').length;
+    renderMovementsChartSummary(stockInCount, stockOutCount);
+    
+
+    
+
 
     const ctx = document.getElementById('movementsChart');
 
@@ -599,6 +605,42 @@ function renderMovementsChart(movements) {
             }
         }
     });
+}
+
+function renderCategoryChartSummary(categoryCounts) {
+    const summaryBox = document.getElementById('categoryChartSummary');
+
+    if (!summaryBox) {
+        return;
+    }
+
+    summaryBox.innerHTML = '';
+
+    Object.entries(categoryCounts).forEach(([category, count]) => {
+        summaryBox.innerHTML += `
+            <span class="chart-summary-badge">
+                ${category}: <strong>${count}</strong>
+            </span>
+        `;
+    });
+}
+
+function renderMovementsChartSummary(stockInCount, stockOutCount) {
+    const summaryBox = document.getElementById('movementsChartSummary');
+
+    if (!summaryBox) {
+        return;
+    }
+
+    summaryBox.innerHTML = `
+        <span class="chart-summary-badge chart-summary-in">
+            Stock In: <strong>${stockInCount}</strong>
+        </span>
+
+        <span class="chart-summary-badge chart-summary-out">
+            Stock Out: <strong>${stockOutCount}</strong>
+        </span>
+    `;
 }
 
 function showSuccess(message) {
