@@ -449,6 +449,7 @@ async function loadStockMovements() {
         const data = await response.json();
         renderStockMovementsTable(data.movements);
         renderMovementsChart(data.movements);
+        renderRecentActivity(data.movements);
 
     } catch (error) {
         showError('Could not load stock movements.');
@@ -641,6 +642,59 @@ function renderMovementsChartSummary(stockInCount, stockOutCount) {
             Stock Out: <strong>${stockOutCount}</strong>
         </span>
     `;
+}
+
+function renderRecentActivity(movements) {
+    const activityList = document.getElementById('recentActivityList');
+
+    if (!activityList) {
+        return;
+    }
+
+    activityList.innerHTML = '';
+
+    if (movements.length === 0) {
+        activityList.innerHTML = `
+            <div class="empty-activity-state">
+                No recent stock activity found.
+            </div>
+        `;
+        return;
+    }
+
+    const recentMovements = movements.slice(0, 5);
+
+    recentMovements.forEach(movement => {
+        const isStockIn = movement.movement_type === 'in';
+
+        const activityIcon = isStockIn ? '+' : '-';
+        const activityClass = isStockIn ? 'activity-in' : 'activity-out';
+        const activityType = isStockIn ? 'Stock In' : 'Stock Out';
+
+        const item = `
+            <div class="activity-item">
+                <div class="activity-icon ${activityClass}">
+                    ${activityIcon}
+                </div>
+
+                <div class="activity-content">
+                    <div class="activity-title">
+                        ${activityType}: ${movement.product_name}
+                    </div>
+
+                    <div class="activity-meta">
+                        SKU: ${movement.sku} · Quantity: ${movement.quantity} · ${movement.created_at}
+                    </div>
+
+                    <div class="activity-note">
+                        ${movement.note ? movement.note : 'No note provided'}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        activityList.innerHTML += item;
+    });
 }
 
 function showSuccess(message) {
