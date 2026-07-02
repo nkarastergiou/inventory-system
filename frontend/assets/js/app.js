@@ -340,35 +340,37 @@ function renderProductsTable(products) {
                 <td>${product.min_stock}</td>
                 <td>€${product.price}</td>
                 <td>${statusBadge}</td>
-                <td>
-                    <button 
-                        class="btn btn-sm btn-outline-success me-1 mb-1"
-                        onclick="createStockMovement(${product.id}, 'in')"
-                    >
-                        Stock In
-                    </button>
+                <td class="actions-cell">
+    <div class="action-buttons">
+        <button 
+            class="btn btn-action btn-stock-in"
+            onclick="createStockMovement(${product.id}, 'in')"
+        >
+            Stock In
+        </button>
 
-                    <button 
-                        class="btn btn-sm btn-outline-warning me-1 mb-1"
-                        onclick="createStockMovement(${product.id}, 'out')"
-                    >
-                        Stock Out
-                    </button>
+        <button 
+            class="btn btn-action btn-stock-out"
+            onclick="createStockMovement(${product.id}, 'out')"
+        >
+            Stock Out
+        </button>
 
-                    <button 
-                        class="btn btn-sm btn-outline-primary me-1 mb-1"
-                        onclick="editProduct(${product.id})"
-                    >
-                        Edit
-                    </button>
+        <button 
+            class="btn btn-action btn-edit"
+            onclick="editProduct(${product.id})"
+        >
+            Edit
+        </button>
 
-                    <button 
-                        class="btn btn-sm btn-outline-danger mb-1"
-                        onclick="deleteProduct(${product.id})"
-                    >
-                        Delete
-                    </button>
-                </td>
+        <button 
+            class="btn btn-action btn-delete"
+            onclick="deleteProduct(${product.id})"
+        >
+            Delete
+        </button>
+    </div>
+</td>
             </tr>
         `;
 

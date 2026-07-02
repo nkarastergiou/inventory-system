@@ -197,3 +197,84 @@ body {
         padding: 20px;
     }
 }
+
+.table-responsive {
+    border-radius: 0 0 18px 18px;
+}
+
+.table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #eef4ff;
+}
+
+.actions-cell {
+    min-width: 260px;
+}
+
+.action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.btn-action {
+    font-size: 12px;
+    padding: 6px 10px;
+    border: 0;
+    font-weight: 700;
+}
+
+.btn-stock-in {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.btn-stock-in:hover {
+    background: #16a34a;
+    color: #ffffff;
+}
+
+.btn-stock-out {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.btn-stock-out:hover {
+    background: #f59e0b;
+    color: #ffffff;
+}
+
+.btn-edit {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.btn-edit:hover {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.btn-delete {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+    color: #ffffff;
+}
+
+.table thead {
+    background: #f8fafc;
+}
+
+.table tbody td {
+    font-size: 14px;
+}
+
+.card h5 {
+    font-weight: 800;
+}
