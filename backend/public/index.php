@@ -324,4 +324,117 @@ $app->delete('/api/products/{id}', function ($request, $response, $args) {
     }
 });
 
+$app->put('/api/products/{id}', function ($request, $response, $args) {
+    try {
+        $pdo = getDatabaseConnection();
+
+        $id = (int) $args['id'];
+
+        if ($id <= 0) {
+            $data = [
+                'status' => 'error',
+                'message' => 'Invalid product ID'
+            ];
+
+            $response->getBody()->write(json_encode($data));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400);
+        }
+
+        $body = $request->getParsedBody();
+
+        $name = trim($body['name'] ?? '');
+        $sku = trim($body['sku'] ?? '');
+        $description = trim($body['description'] ?? '');
+        $categoryId = $body['category_id'] ?? null;
+        $supplierId = $body['supplier_id'] ?? null;
+        $quantity = $body['quantity'] ?? 0;
+        $minStock = $body['min_stock'] ?? 5;
+        $price = $body['price'] ?? 0;
+
+        if ($name === '' || $sku === '') {
+            $data = [
+                'status' => 'error',
+                'message' => 'Name and SKU are required'
+            ];
+
+            $response->getBody()->write(json_encode($data));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400);
+        }
+
+        $checkStmt = $pdo->prepare('SELECT id FROM products WHERE id = :id');
+        $checkStmt->execute([':id' => $id]);
+        $product = $checkStmt->fetch();
+
+        if (!$product) {
+            $data = [
+                'status' => 'error',
+                'message' => 'Product not found'
+            ];
+
+            $response->getBody()->write(json_encode($data));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);
+        }
+
+        $sql = "
+            UPDATE products
+            SET 
+                category_id = :category_id,
+                supplier_id = :supplier_id,
+                name = :name,
+                sku = :sku,
+                description = :description,
+                quantity = :quantity,
+                min_stock = :min_stock,
+                price = :price
+            WHERE id = :id
+        ";
+
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->execute([
+            ':category_id' => $categoryId,
+            ':supplier_id' => $supplierId,
+            ':name' => $name,
+            ':sku' => $sku,
+            ':description' => $description,
+            ':quantity' => $quantity,
+            ':min_stock' => $minStock,
+            ':price' => $price,
+            ':id' => $id
+        ]);
+
+        $data = [
+            'status' => 'ok',
+            'message' => 'Product updated successfully'
+        ];
+
+        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200);
+
+    } catch (PDOException $e) {
+        $data = [
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ];
+
+        $response->getBody()->write(json_encode($data));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(500);
+    }
+});
+
 $app->run();
