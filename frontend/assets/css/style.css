@@ -643,3 +643,112 @@ html {
     background: #dc2626;
     color: #ffffff;
 }
+.sidebar-brand small {
+    display: block;
+    margin-top: 6px;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.menu-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.sidebar-menu li.active .menu-icon {
+    background: rgba(96, 165, 250, 0.22);
+    color: #bfdbfe;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.page-kicker {
+    display: inline-block;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 7px 11px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+}
+
+.stat-card {
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 35px rgba(15, 23, 42, 0.12);
+}
+
+.stat-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 18px;
+}
+
+.stat-icon-blue {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.stat-icon-orange {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.stat-icon-green {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.stat-icon-purple {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.app-footer {
+    color: #64748b;
+    font-size: 14px;
+    text-align: center;
+    padding: 10px 0 28px;
+}
+
+.app-footer span {
+    font-weight: 900;
+    color: #111827;
+}

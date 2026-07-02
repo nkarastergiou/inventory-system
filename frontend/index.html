@@ -68,6 +68,7 @@
     <aside class="sidebar">
         <div class="sidebar-brand">
             Inventory<span>Pro</span>
+            <small>Inventory Control Panel</small>
         </div>
         <div class="sidebar-user">
             <div class="sidebar-user-label">Signed in as</div>
@@ -75,59 +76,89 @@
         </div>
 
         <ul class="sidebar-menu">
-            <button type="button" class="sidebar-logout-btn" id="logoutBtn">
-                Logout
-            </button>
-
     <li class="active">
-        <a href="#dashboardSection">Dashboard</a>
+        <a href="#dashboardSection">
+            <span class="menu-icon">▦</span>
+            Dashboard
+        </a>
     </li>
+
     <li>
-        <a href="#productsSection">Products</a>
+        <a href="#productsSection">
+            <span class="menu-icon">□</span>
+            Products
+        </a>
     </li>
+
     <li>
-        <a href="#stockMovementsSection">Stock Movements</a>
+        <a href="#stockMovementsSection">
+            <span class="menu-icon">↕</span>
+            Stock Movements
+        </a>
     </li>
+
     <li>
-        <a href="#reportsSection">Reports</a>
+        <a href="#reportsSection">
+            <span class="menu-icon">◷</span>
+            Reports
+        </a>
     </li>
 </ul>
+
+<button type="button" class="sidebar-logout-btn" id="logoutBtn">
+    Logout
+</button>
     </aside>
 
     <main class="main-content">
 
         <div class="page-header" id="dashboardSection">
-            <h1>Inventory Dashboard</h1>
-            <p>Manage products, stock levels, suppliers, and inventory movements.</p>
-        </div>
+    <div>
+        <span class="page-kicker">Admin Dashboard</span>
+        <h1>Inventory Dashboard</h1>
+        <p>Manage products, stock levels, suppliers, and inventory movements.</p>
+    </div>
+</div>
 
         <div class="row mb-4">
     <div class="col-xl-3 col-md-6 mb-3">
         <div class="stat-card">
-            <div class="stat-label">Total Products</div>
+            <div class="stat-card-top">
+                <div class="stat-label">Total Products</div>
+                <div class="stat-icon stat-icon-blue">□</div>
+            </div>
             <h2 class="stat-value" id="totalProducts">0</h2>
         </div>
     </div>
 
     <div class="col-xl-3 col-md-6 mb-3">
         <div class="stat-card">
-            <div class="stat-label">Low Stock Products</div>
+            <div class="stat-card-top">
+                <div class="stat-label">Low Stock Products</div>
+                <div class="stat-icon stat-icon-orange">!</div>
+            </div>
             <h2 class="stat-value" id="lowStockProducts">0</h2>
         </div>
     </div>
 
     <div class="col-xl-3 col-md-6 mb-3">
         <div class="stat-card">
-            <div class="stat-label">Total Stock Items</div>
+            <div class="stat-card-top">
+                <div class="stat-label">Total Stock Items</div>
+                <div class="stat-icon stat-icon-green">+</div>
+            </div>
             <h2 class="stat-value" id="totalStockItems">0</h2>
         </div>
     </div>
 
     <div class="col-xl-3 col-md-6 mb-3">
         <div class="stat-card">
-            <div class="stat-label">Stock Movements</div>
-            <h2 class="stat-value" id="totalMovements">0</h2>
+            <div class="stat-card-top">
+                <div class="stat-label">Stock Movements</div>
+            <div class="stat-icon stat-icon-purple">↕</div>
         </div>
+     <h2 class="stat-value" id="totalMovements">0</h2>
+</div>
     </div>
 </div>
 
@@ -377,7 +408,10 @@
         </div>
     </div>
 </div>
-
+<footer class="app-footer">
+    <span>InventoryPro</span>
+    Built with PHP, Slim Framework, MySQL, JavaScript and Bootstrap.
+</footer>
     </main>
 
 </div>
@@ -467,6 +501,8 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     Close
                 </button>
+                
+
             </div>
         </div>
     </div>
