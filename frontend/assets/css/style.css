@@ -321,3 +321,59 @@ html {
     margin: 0;
     font-size: 14px;
 }
+.low-stock-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-left: 5px solid #f97316;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.low-stock-item h6 {
+    font-weight: 800;
+    margin-bottom: 4px;
+    color: #9a3412;
+}
+
+.low-stock-item p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.low-stock-numbers {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.low-stock-numbers span {
+    background: #ffffff;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 13px;
+    color: #374151;
+    border: 1px solid #fed7aa;
+}
+
+.empty-alert-state {
+    background: #ecfdf5;
+    border: 1px solid #bbf7d0;
+    border-left: 5px solid #16a34a;
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.empty-alert-state strong {
+    color: #166534;
+}
+
+.empty-alert-state p {
+    margin: 4px 0 0;
+    color: #6b7280;
+}

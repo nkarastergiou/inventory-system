@@ -49,6 +49,7 @@ async function loadProducts() {
         currentProducts = data.products;
 
         renderStats(currentProducts);
+        renderLowStockAlerts(currentProducts);
         renderProductsTable(currentProducts);
 
     } catch (error) {
@@ -318,6 +319,47 @@ function renderStats(products) {
     document.getElementById('totalProducts').textContent = totalProducts;
     document.getElementById('lowStockProducts').textContent = lowStockProducts;
     document.getElementById('totalStockItems').textContent = totalStockItems;
+}
+
+function renderLowStockAlerts(products) {
+    const lowStockProducts = products.filter(product => {
+        return Number(product.quantity) <= Number(product.min_stock);
+    });
+
+    const alertsList = document.getElementById('lowStockAlertsList');
+    const lowStockBadge = document.getElementById('lowStockBadge');
+
+    lowStockBadge.textContent = `${lowStockProducts.length} alert${lowStockProducts.length === 1 ? '' : 's'}`;
+
+    if (lowStockProducts.length === 0) {
+        alertsList.innerHTML = `
+            <div class="empty-alert-state">
+                <strong>All products are sufficiently stocked.</strong>
+                <p>No products are currently below their minimum stock level.</p>
+            </div>
+        `;
+        return;
+    }
+
+    alertsList.innerHTML = '';
+
+    lowStockProducts.forEach(product => {
+        const alertItem = `
+            <div class="low-stock-item">
+                <div>
+                    <h6>${product.name}</h6>
+                    <p>SKU: ${product.sku} | Category: ${product.category_name ?? '-'}</p>
+                </div>
+
+                <div class="low-stock-numbers">
+                    <span>Current: <strong>${product.quantity}</strong></span>
+                    <span>Minimum: <strong>${product.min_stock}</strong></span>
+                </div>
+            </div>
+        `;
+
+        alertsList.innerHTML += alertItem;
+    });
 }
 
 function renderProductsTable(products) {
