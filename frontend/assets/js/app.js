@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCategories();
     loadSuppliers();
     loadStockMovements();
+    setupSidebarNavigation();
 
     const addProductForm = document.getElementById('addProductForm');
     addProductForm.addEventListener('submit', handleProductFormSubmit);
@@ -21,6 +22,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('input', handleSearchProducts);
 });
+
+function setupSidebarNavigation() {
+    const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
+
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            sidebarLinks.forEach(item => {
+                item.parentElement.classList.remove('active');
+            });
+
+            link.parentElement.classList.add('active');
+        });
+    });
+}
 
 async function loadProducts() {
     try {

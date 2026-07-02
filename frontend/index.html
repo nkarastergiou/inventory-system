@@ -22,16 +22,24 @@
         </div>
 
         <ul class="sidebar-menu">
-            <li class="active">Dashboard</li>
-            <li>Products</li>
-            <li>Stock Movements</li>
-            <li>Reports</li>
-        </ul>
+    <li class="active">
+        <a href="#dashboardSection">Dashboard</a>
+    </li>
+    <li>
+        <a href="#productsSection">Products</a>
+    </li>
+    <li>
+        <a href="#stockMovementsSection">Stock Movements</a>
+    </li>
+    <li>
+        <a href="#reportsSection">Reports</a>
+    </li>
+</ul>
     </aside>
 
     <main class="main-content">
 
-        <div class="page-header">
+        <div class="page-header" id="dashboardSection">
             <h1>Inventory Dashboard</h1>
             <p>Manage products, stock levels, suppliers, and inventory movements.</p>
         </div>
@@ -68,7 +76,7 @@
 
         <div id="alertBox"></div>
 
-        <div class="card mb-4">
+        <div class="card mb-4"> 
             <div class="card-header bg-white">
                 <h5 id="formTitle" class="mb-0">Add New Product</h5>
             </div>
@@ -132,7 +140,7 @@
             </div>
         </div>
 
-        <div class="card mb-4">
+        <div class="card mb-4" id="productsSection">
             <div class="card-header bg-white">
                 <div class="row align-items-center g-2">
                     <div class="col-md-4">
@@ -184,7 +192,7 @@
             </div>
         </div>
 
-        <div class="card mb-4">
+        <div class="card mb-4" id="stockMovementsSection">
             <div class="card-header bg-white">
                 <h5 class="mb-0">Stock Movement History</h5>
             </div>
@@ -212,6 +220,36 @@
                 </div>
             </div>
         </div>
+        <div class="card mb-4" id="reportsSection">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Inventory Reports</h5>
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="report-box">
+                    <h6>Stock Overview</h6>
+                    <p>Monitor total products, available stock items, and low stock alerts.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="report-box">
+                    <h6>Movement Tracking</h6>
+                    <p>Review stock in and stock out actions through the movement history table.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="report-box">
+                    <h6>Inventory Control</h6>
+                    <p>Use product search, stock actions, and CRUD tools to manage inventory efficiently.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
     </main>
 
