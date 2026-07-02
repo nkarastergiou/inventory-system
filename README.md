@@ -122,7 +122,7 @@ Installation & Setup
 
 1. Clone the repository
 
-git clone https://github.com/YOUR-USERNAME/inventory-system.git
+git clone https://github.com/nkarastergiou/inventory-system.git
 cd inventory-system
 
 2. Start XAMPP
