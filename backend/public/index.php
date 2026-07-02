@@ -439,4 +439,174 @@ $app->put('/api/products/{id}', function ($request, $response, $args) {
     }
 });
 
+$app->post('/api/stock-movements', function ($request, $response) {
+    try {
+        $pdo = getDatabaseConnection();
+
+        $body = $request->getParsedBody();
+
+        $productId = (int) ($body['product_id'] ?? 0);
+        $movementType = $body['movement_type'] ?? '';
+        $quantity = (int) ($body['quantity'] ?? 0);
+        $note = trim($body['note'] ?? '');
+
+        if ($productId <= 0 || !in_array($movementType, ['in', 'out']) || $quantity <= 0) {
+            $data = [
+                'status' => 'error',
+                'message' => 'Invalid stock movement data'
+            ];
+
+            $response->getBody()->write(json_encode($data));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400);
+        }
+
+        $pdo->beginTransaction();
+
+        $productStmt = $pdo->prepare('SELECT id, quantity FROM products WHERE id = :id');
+        $productStmt->execute([':id' => $productId]);
+        $product = $productStmt->fetch();
+
+        if (!$product) {
+            $pdo->rollBack();
+
+            $data = [
+                'status' => 'error',
+                'message' => 'Product not found'
+            ];
+
+            $response->getBody()->write(json_encode($data));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);
+        }
+
+        $currentQuantity = (int) $product['quantity'];
+
+        if ($movementType === 'out' && $quantity > $currentQuantity) {
+            $pdo->rollBack();
+
+            $data = [
+                'status' => 'error',
+                'message' => 'Not enough stock available'
+            ];
+
+            $response->getBody()->write(json_encode($data));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400);
+        }
+
+        $newQuantity = $movementType === 'in'
+            ? $currentQuantity + $quantity
+            : $currentQuantity - $quantity;
+
+        $movementStmt = $pdo->prepare("
+            INSERT INTO stock_movements 
+            (product_id, movement_type, quantity, note)
+            VALUES 
+            (:product_id, :movement_type, :quantity, :note)
+        ");
+
+        $movementStmt->execute([
+            ':product_id' => $productId,
+            ':movement_type' => $movementType,
+            ':quantity' => $quantity,
+            ':note' => $note
+        ]);
+
+        $updateStmt = $pdo->prepare("
+            UPDATE products 
+            SET quantity = :quantity 
+            WHERE id = :id
+        ");
+
+        $updateStmt->execute([
+            ':quantity' => $newQuantity,
+            ':id' => $productId
+        ]);
+
+        $pdo->commit();
+
+        $data = [
+            'status' => 'ok',
+            'message' => 'Stock movement created successfully',
+            'new_quantity' => $newQuantity
+        ];
+
+        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(201);
+
+    } catch (Exception $e) {
+        if (isset($pdo) && $pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
+        $data = [
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ];
+
+        $response->getBody()->write(json_encode($data));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(500);
+    }
+});
+
+$app->get('/api/stock-movements', function ($request, $response) {
+    try {
+        $pdo = getDatabaseConnection();
+
+        $sql = "
+            SELECT 
+                sm.id,
+                sm.product_id,
+                p.name AS product_name,
+                p.sku,
+                sm.movement_type,
+                sm.quantity,
+                sm.note,
+                sm.created_at
+            FROM stock_movements sm
+            INNER JOIN products p ON sm.product_id = p.id
+            ORDER BY sm.id DESC
+        ";
+
+        $stmt = $pdo->query($sql);
+        $movements = $stmt->fetchAll();
+
+        $data = [
+            'status' => 'ok',
+            'movements' => $movements
+        ];
+
+        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200);
+
+    } catch (Exception $e) {
+        $data = [
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ];
+
+        $response->getBody()->write(json_encode($data));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(500);
+    }
+});
+
 $app->run();
