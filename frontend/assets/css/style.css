@@ -483,3 +483,77 @@ html {
     color: #ffffff;
     border-color: #4f46e5;
 }
+.btn-view {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.btn-view:hover {
+    background: #7c3aed;
+    color: #ffffff;
+}
+
+.product-modal {
+    border: 0;
+    border-radius: 22px;
+    overflow: hidden;
+}
+
+.product-modal .modal-header {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 22px;
+}
+
+.product-modal .modal-title {
+    font-weight: 900;
+    color: #111827;
+}
+
+.modal-subtitle {
+    color: #6b7280;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.product-modal .modal-body {
+    padding: 24px;
+}
+
+.product-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.product-detail-header h3 {
+    font-weight: 900;
+    margin-bottom: 6px;
+    color: #111827;
+}
+
+.product-detail-header p {
+    color: #6b7280;
+    margin: 0;
+}
+
+.detail-box {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 16px;
+    height: 100%;
+}
+
+.detail-box span {
+    display: block;
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.detail-box strong {
+    color: #111827;
+    font-size: 16px;
+}

@@ -158,6 +158,41 @@ async function handleProductFormSubmit(event) {
     }
 }
 
+function showProductDetails(productId) {
+    const product = currentProducts.find(item => Number(item.id) === Number(productId));
+
+    if (!product) {
+        showError('Product not found.');
+        return;
+    }
+
+    const isLowStock = Number(product.quantity) <= Number(product.min_stock);
+
+    const statusElement = document.getElementById('modalProductStatus');
+
+    statusElement.textContent = isLowStock ? 'Low Stock' : 'In Stock';
+    statusElement.className = isLowStock
+        ? 'badge bg-danger'
+        : 'badge bg-success';
+
+    document.getElementById('modalProductId').textContent = product.id;
+    document.getElementById('modalProductName').textContent = product.name;
+    document.getElementById('modalProductSku').textContent = `SKU: ${product.sku}`;
+    document.getElementById('modalProductDescription').textContent =
+        product.description || 'No description available.';
+
+    document.getElementById('modalProductCategory').textContent = product.category_name ?? '-';
+    document.getElementById('modalProductSupplier').textContent = product.supplier_name ?? '-';
+    document.getElementById('modalProductPrice').textContent = `€${product.price}`;
+    document.getElementById('modalProductQuantity').textContent = product.quantity;
+    document.getElementById('modalProductMinStock').textContent = product.min_stock;
+    document.getElementById('modalProductCreatedAt').textContent = product.created_at ?? '-';
+    document.getElementById('modalProductUpdatedAt').textContent = product.updated_at ?? '-';
+
+    const modal = new bootstrap.Modal(document.getElementById('productDetailsModal'));
+    modal.show();
+}
+
 function editProduct(productId) {
     const product = currentProducts.find(item => Number(item.id) === Number(productId));
 
@@ -411,6 +446,12 @@ function renderProductsTable(products) {
                 <td>${statusBadge}</td>
                 <td class="actions-cell">
     <div class="action-buttons">
+        <button 
+            class="btn btn-action btn-view"
+            onclick="showProductDetails(${product.id})"
+        >
+            View
+        </button>
         <button 
             class="btn btn-action btn-stock-in"
             onclick="createStockMovement(${product.id}, 'in')"
