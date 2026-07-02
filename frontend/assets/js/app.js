@@ -1,6 +1,7 @@
 const PRODUCTS_API_URL = 'http://localhost:8080/api/products';
 const CATEGORIES_API_URL = 'http://localhost:8080/api/categories';
 const SUPPLIERS_API_URL = 'http://localhost:8080/api/suppliers';
+const STOCK_MOVEMENTS_API_URL = 'http://localhost:8080/api/stock-movements';
 
 let currentProducts = [];
 let editingProductId = null;
@@ -195,6 +196,69 @@ function handleSearchProducts() {
     renderProductsTable(filteredProducts);
 }
 
+async function createStockMovement(productId, movementType) {
+    const product = currentProducts.find(item => Number(item.id) === Number(productId));
+
+    if (!product) {
+        showError('Product not found.');
+        return;
+    }
+
+    const quantityInput = prompt(
+        movementType === 'in'
+            ? `Enter quantity to add for ${product.name}:`
+            : `Enter quantity to remove from ${product.name}:`
+    );
+
+    if (quantityInput === null) {
+        return;
+    }
+
+    const quantity = Number(quantityInput);
+
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+        showError('Quantity must be a positive whole number.');
+        return;
+    }
+
+    const note = prompt('Add a note for this stock movement:', '');
+
+    const movement = {
+        product_id: productId,
+        movement_type: movementType,
+        quantity: quantity,
+        note: note ?? ''
+    };
+
+    try {
+        const response = await fetch(STOCK_MOVEMENTS_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(movement)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to create stock movement');
+        }
+
+        showSuccess(
+            movementType === 'in'
+                ? `Stock increased successfully. New quantity: ${data.new_quantity}`
+                : `Stock decreased successfully. New quantity: ${data.new_quantity}`
+        );
+
+        loadProducts();
+
+    } catch (error) {
+        showError(error.message);
+        console.error(error);
+    }
+}
+
 async function deleteProduct(productId) {
     const confirmed = confirm('Are you sure you want to delete this product?');
 
@@ -236,7 +300,7 @@ function renderStats(products) {
 function renderProductsTable(products) {
     const tableBody = document.getElementById('productsTableBody');
     const productsCountText = document.getElementById('productsCountText');
-    
+
     productsCountText.textContent = `Showing ${products.length} product${products.length === 1 ? '' : 's'}`;
 
     tableBody.innerHTML = '';
@@ -270,14 +334,28 @@ function renderProductsTable(products) {
                 <td>${statusBadge}</td>
                 <td>
                     <button 
-                        class="btn btn-sm btn-outline-primary me-1"
+                        class="btn btn-sm btn-outline-success me-1 mb-1"
+                        onclick="createStockMovement(${product.id}, 'in')"
+                    >
+                        Stock In
+                    </button>
+
+                    <button 
+                        class="btn btn-sm btn-outline-warning me-1 mb-1"
+                        onclick="createStockMovement(${product.id}, 'out')"
+                    >
+                        Stock Out
+                    </button>
+
+                    <button 
+                        class="btn btn-sm btn-outline-primary me-1 mb-1"
                         onclick="editProduct(${product.id})"
                     >
                         Edit
                     </button>
 
                     <button 
-                        class="btn btn-sm btn-outline-danger"
+                        class="btn btn-sm btn-outline-danger mb-1"
                         onclick="deleteProduct(${product.id})"
                     >
                         Delete
