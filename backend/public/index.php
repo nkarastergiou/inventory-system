@@ -20,6 +20,49 @@ function getBearerTokenFromRequest($request): ?string
     return null;
 }
 
+function getAuthenticatedUserFromRequest($request): ?array
+{
+    $token = getBearerTokenFromRequest($request);
+
+    if (!$token) {
+        return null;
+    }
+
+    $pdo = getDatabaseConnection();
+
+    $stmt = $pdo->prepare("
+        SELECT 
+            users.id,
+            users.name,
+            users.email
+        FROM auth_tokens
+        INNER JOIN users ON auth_tokens.user_id = users.id
+        WHERE auth_tokens.token = :token
+          AND (auth_tokens.expires_at IS NULL OR auth_tokens.expires_at > NOW())
+        LIMIT 1
+    ");
+
+    $stmt->execute([':token' => $token]);
+
+    $user = $stmt->fetch();
+
+    return $user ?: null;
+}
+
+function unauthorizedResponse($response)
+{
+    $data = [
+        'status' => 'error',
+        'message' => 'Unauthorized'
+    ];
+
+    $response->getBody()->write(json_encode($data));
+
+    return $response
+        ->withHeader('Content-Type', 'application/json')
+        ->withStatus(401);
+}
+
 $app = AppFactory::create();
 
 $app->addBodyParsingMiddleware();
@@ -84,6 +127,11 @@ $app->get('/api/db-test', function ($request, $response) {
 
 $app->get('/api/products', function ($request, $response) {
     try {
+        $user = getAuthenticatedUserFromRequest($request);
+
+if (!$user) {
+    return unauthorizedResponse($response);
+}
         $pdo = getDatabaseConnection();
 
         $sql = "
@@ -141,6 +189,11 @@ $app->options('/{routes:.+}', function ($request, $response) {
 
 $app->get('/api/categories', function ($request, $response) {
     try {
+        $user = getAuthenticatedUserFromRequest($request);
+
+if (!$user) {
+    return unauthorizedResponse($response);
+}
         $pdo = getDatabaseConnection();
 
         $stmt = $pdo->query('SELECT id, name FROM categories ORDER BY name ASC');
@@ -173,6 +226,11 @@ $app->get('/api/categories', function ($request, $response) {
 
 $app->get('/api/suppliers', function ($request, $response) {
     try {
+        $user = getAuthenticatedUserFromRequest($request);
+
+if (!$user) {
+    return unauthorizedResponse($response);
+}
         $pdo = getDatabaseConnection();
 
         $stmt = $pdo->query('SELECT id, name FROM suppliers ORDER BY name ASC');
@@ -205,6 +263,11 @@ $app->get('/api/suppliers', function ($request, $response) {
 
 $app->post('/api/products', function ($request, $response) {
     try {
+        $user = getAuthenticatedUserFromRequest($request);
+
+if (!$user) {
+    return unauthorizedResponse($response);
+}
         $pdo = getDatabaseConnection();
 
         $body = $request->getParsedBody();
@@ -279,6 +342,11 @@ $app->post('/api/products', function ($request, $response) {
 
 $app->delete('/api/products/{id}', function ($request, $response, $args) {
     try {
+        $user = getAuthenticatedUserFromRequest($request);
+
+if (!$user) {
+    return unauthorizedResponse($response);
+}
         $pdo = getDatabaseConnection();
 
         $id = (int) $args['id'];
@@ -343,6 +411,11 @@ $app->delete('/api/products/{id}', function ($request, $response, $args) {
 
 $app->put('/api/products/{id}', function ($request, $response, $args) {
     try {
+        $user = getAuthenticatedUserFromRequest($request);
+
+if (!$user) {
+    return unauthorizedResponse($response);
+}
         $pdo = getDatabaseConnection();
 
         $id = (int) $args['id'];
@@ -456,6 +529,11 @@ $app->put('/api/products/{id}', function ($request, $response, $args) {
 
 $app->post('/api/stock-movements', function ($request, $response) {
     try {
+        $user = getAuthenticatedUserFromRequest($request);
+
+if (!$user) {
+    return unauthorizedResponse($response);
+}
         $pdo = getDatabaseConnection();
 
         $body = $request->getParsedBody();
@@ -579,6 +657,11 @@ $app->post('/api/stock-movements', function ($request, $response) {
 
 $app->get('/api/stock-movements', function ($request, $response) {
     try {
+        $user = getAuthenticatedUserFromRequest($request);
+
+if (!$user) {
+    return unauthorizedResponse($response);
+}
         $pdo = getDatabaseConnection();
 
         $sql = "

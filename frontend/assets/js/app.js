@@ -177,9 +177,28 @@ function showLoginError(message) {
     `;
 }
 
+function getAuthToken() {
+    return localStorage.getItem(AUTH_TOKEN_KEY);
+}
+
+function getAuthHeaders() {
+    return {
+        Authorization: `Bearer ${getAuthToken()}`
+    };
+}
+
+function getJsonAuthHeaders() {
+    return {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAuthToken()}`
+    };
+}
+
 async function loadProducts() {
     try {
-        const response = await fetch(PRODUCTS_API_URL);
+        const response = await fetch(PRODUCTS_API_URL, {
+    headers: getAuthHeaders()
+});
 
         if (!response.ok) {
             throw new Error('Failed to fetch products');
@@ -201,7 +220,9 @@ async function loadProducts() {
 
 async function loadCategories() {
     try {
-        const response = await fetch(CATEGORIES_API_URL);
+        const response = await fetch(CATEGORIES_API_URL, {
+    headers: getAuthHeaders()
+});
         const data = await response.json();
 
         const categorySelect = document.getElementById('category_id');
@@ -221,7 +242,9 @@ async function loadCategories() {
 
 async function loadSuppliers() {
     try {
-        const response = await fetch(SUPPLIERS_API_URL);
+        const response = await fetch(SUPPLIERS_API_URL, {
+    headers: getAuthHeaders()
+});
         const data = await response.json();
 
         const supplierSelect = document.getElementById('supplier_id');
@@ -264,9 +287,7 @@ async function handleProductFormSubmit(event) {
 
         const response = await fetch(url, {
             method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: getJsonAuthHeaders(),
             body: JSON.stringify(product)
         });
 
@@ -425,12 +446,10 @@ async function createStockMovement(productId, movementType) {
 
     try {
         const response = await fetch(STOCK_MOVEMENTS_API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(movement)
-        });
+    method: 'POST',
+    headers: getJsonAuthHeaders(),
+    body: JSON.stringify(movement)
+});
 
         const data = await response.json();
 
@@ -462,8 +481,9 @@ async function deleteProduct(productId) {
 
     try {
         const response = await fetch(`${PRODUCTS_API_URL}/${productId}`, {
-            method: 'DELETE'
-        });
+    method: 'DELETE',
+    headers: getAuthHeaders()
+});
 
         const data = await response.json();
 
@@ -619,7 +639,9 @@ function renderProductsTable(products) {
 
 async function loadStockMovements() {
     try {
-        const response = await fetch(STOCK_MOVEMENTS_API_URL);
+        const response = await fetch(STOCK_MOVEMENTS_API_URL, {
+    headers: getAuthHeaders()
+});
 
         if (!response.ok) {
             throw new Error('Failed to fetch stock movements');
