@@ -296,8 +296,13 @@ function renderStats(products) {
         return Number(product.quantity) <= Number(product.min_stock);
     }).length;
 
+    const totalStockItems = products.reduce((sum, product) => {
+        return sum + Number(product.quantity);
+    }, 0);
+
     document.getElementById('totalProducts').textContent = totalProducts;
     document.getElementById('lowStockProducts').textContent = lowStockProducts;
+    document.getElementById('totalStockItems').textContent = totalStockItems;
 }
 
 function renderProductsTable(products) {
@@ -390,6 +395,9 @@ async function loadStockMovements() {
 
 function renderStockMovementsTable(movements) {
     const tableBody = document.getElementById('movementsTableBody');
+    
+    document.getElementById('totalMovements').textContent = movements.length;
+
 
     tableBody.innerHTML = '';
 
