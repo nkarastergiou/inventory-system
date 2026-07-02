@@ -14,14 +14,69 @@
 
 <body>
 
-<div class="app-shell">
+<div class="login-screen" id="loginScreen">
+    <div class="login-card">
+        <div class="login-brand">
+            Inventory<span>Pro</span>
+        </div>
+
+        <h1>Admin Login</h1>
+        <p>Sign in to manage inventory, stock movements, and reports.</p>
+
+        <div id="loginAlertBox"></div>
+
+        <form id="loginForm">
+            <div class="mb-3">
+                <label for="loginEmail" class="form-label">Email</label>
+                <input 
+                    type="email" 
+                    class="form-control" 
+                    id="loginEmail" 
+                    value="admin@example.com"
+                    required
+                >
+            </div>
+
+            <div class="mb-3">
+                <label for="loginPassword" class="form-label">Password</label>
+                <input 
+                    type="password" 
+                    class="form-control" 
+                    id="loginPassword" 
+                    value="password"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+                Login
+            </button>
+        </form>
+
+        <div class="demo-login-hint">
+            Demo account: admin@example.com / password
+        </div>
+    </div>
+</div>
+
+<div class="app-shell d-none" id="appShell">
+
+
 
     <aside class="sidebar">
         <div class="sidebar-brand">
             Inventory<span>Pro</span>
         </div>
+        <div class="sidebar-user">
+            <div class="sidebar-user-label">Signed in as</div>
+            <div class="sidebar-user-name" id="sidebarUserName">Admin User</div>
+        </div>
 
         <ul class="sidebar-menu">
+            <button type="button" class="sidebar-logout-btn" id="logoutBtn">
+                Logout
+            </button>
+
     <li class="active">
         <a href="#dashboardSection">Dashboard</a>
     </li>

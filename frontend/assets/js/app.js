@@ -2,36 +2,27 @@ const PRODUCTS_API_URL = 'http://localhost:8080/api/products';
 const CATEGORIES_API_URL = 'http://localhost:8080/api/categories';
 const SUPPLIERS_API_URL = 'http://localhost:8080/api/suppliers';
 const STOCK_MOVEMENTS_API_URL = 'http://localhost:8080/api/stock-movements';
+const LOGIN_API_URL = 'http://localhost:8080/api/login';
+const ME_API_URL = 'http://localhost:8080/api/me';
+const LOGOUT_API_URL = 'http://localhost:8080/api/logout';
+const AUTH_TOKEN_KEY = 'inventory_auth_token';
 
 let currentProducts = [];
 let currentMovements = [];
 let editingProductId = null;
+let currentUser = null;
+let dashboardInitialized = false;
 let categoryChart = null;
 let movementsChart = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadProducts();
-    loadCategories();
-    loadSuppliers();
-    loadStockMovements();
-    setupSidebarNavigation();
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', handleLogin);
 
-    const addProductForm = document.getElementById('addProductForm');
-    addProductForm.addEventListener('submit', handleProductFormSubmit);
+    const logoutBtn = document.getElementById('logoutBtn');
+    logoutBtn.addEventListener('click', handleLogout);
 
-    const cancelEditBtn = document.getElementById('cancelEditBtn');
-    cancelEditBtn.addEventListener('click', resetProductForm);
-    
-    const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', handleSearchProducts);
-
-    const exportProductsBtn = document.getElementById('exportProductsBtn');
-    exportProductsBtn.addEventListener('click', exportProductsToCSV);
-
-    const exportMovementsBtn = document.getElementById('exportMovementsBtn');
-    exportMovementsBtn.addEventListener('click', exportMovementsToCSV);
-
-
+    checkExistingSession();
 });
 
 function setupSidebarNavigation() {
@@ -46,6 +37,144 @@ function setupSidebarNavigation() {
             link.parentElement.classList.add('active');
         });
     });
+}
+
+async function checkExistingSession() {
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+
+    if (!token) {
+        showLoginScreen();
+        return;
+    }
+
+    try {
+        const response = await fetch(ME_API_URL, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Session expired');
+        }
+
+        currentUser = data.user;
+        showDashboard();
+
+    } catch (error) {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+        showLoginScreen();
+    }
+}
+
+async function handleLogin(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    try {
+        const response = await fetch(LOGIN_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Login failed');
+        }
+
+        localStorage.setItem(AUTH_TOKEN_KEY, data.token);
+        currentUser = data.user;
+
+        showDashboard();
+
+    } catch (error) {
+        showLoginError(error.message);
+    }
+}
+
+async function handleLogout() {
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+
+    try {
+        if (token) {
+            await fetch(LOGOUT_API_URL, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+        }
+    } catch (error) {
+        console.error(error);
+    }
+
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    currentUser = null;
+    dashboardInitialized = false;
+
+    showLoginScreen();
+}
+
+function showLoginScreen() {
+    document.getElementById('loginScreen').classList.remove('d-none');
+    document.getElementById('appShell').classList.add('d-none');
+}
+
+function showDashboard() {
+    document.getElementById('loginScreen').classList.add('d-none');
+    document.getElementById('appShell').classList.remove('d-none');
+
+    document.getElementById('sidebarUserName').textContent = currentUser?.name || 'Admin User';
+
+    if (!dashboardInitialized) {
+        initializeDashboard();
+        dashboardInitialized = true;
+    }
+
+    loadProducts();
+    loadStockMovements();
+}
+
+function initializeDashboard() {
+    loadCategories();
+    loadSuppliers();
+    setupSidebarNavigation();
+
+    const addProductForm = document.getElementById('addProductForm');
+    addProductForm.addEventListener('submit', handleProductFormSubmit);
+
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    cancelEditBtn.addEventListener('click', resetProductForm);
+
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', handleSearchProducts);
+
+    const exportProductsBtn = document.getElementById('exportProductsBtn');
+    exportProductsBtn.addEventListener('click', exportProductsToCSV);
+
+    const exportMovementsBtn = document.getElementById('exportMovementsBtn');
+    exportMovementsBtn.addEventListener('click', exportMovementsToCSV);
+}
+
+function showLoginError(message) {
+    const loginAlertBox = document.getElementById('loginAlertBox');
+
+    loginAlertBox.innerHTML = `
+        <div class="alert alert-danger">
+            ${message}
+        </div>
+    `;
 }
 
 async function loadProducts() {
