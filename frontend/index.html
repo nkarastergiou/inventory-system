@@ -7,185 +7,201 @@
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
-<body class="bg-light">
+<body>
 
-<nav class="navbar navbar-dark bg-dark">
-    <div class="container">
-        <span class="navbar-brand mb-0 h1">Inventory Management System</span>
-    </div>
-</nav>
+<div class="app-shell">
 
-<main class="container py-4">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            Inventory<span>Pro</span>
+        </div>
 
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h6 class="text-muted">Total Products</h6>
-                    <h2 id="totalProducts">0</h2>
+        <ul class="sidebar-menu">
+            <li class="active">Dashboard</li>
+            <li>Products</li>
+            <li>Stock Movements</li>
+            <li>Reports</li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+
+        <div class="page-header">
+            <h1>Inventory Dashboard</h1>
+            <p>Manage products, stock levels, suppliers, and inventory movements.</p>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <div class="stat-card">
+                    <div class="stat-label">Total Products</div>
+                    <h2 class="stat-value" id="totalProducts">0</h2>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="stat-card">
+                    <div class="stat-label">Low Stock Products</div>
+                    <h2 class="stat-value" id="lowStockProducts">0</h2>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 mt-3 mt-md-0">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h6 class="text-muted">Low Stock Products</h6>
-                    <h2 id="lowStockProducts">0</h2>
+        <div id="alertBox"></div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 id="formTitle" class="mb-0">Add New Product</h5>
+            </div>
+
+            <div class="card-body">
+                <form id="addProductForm">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="name" class="form-label">Product Name</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="sku" class="form-label">SKU</label>
+                            <input type="text" class="form-control" id="sku" required>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="price" class="form-label">Price</label>
+                            <input type="number" class="form-control" id="price" step="0.01" min="0" required>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="category_id" class="form-label">Category</label>
+                            <select class="form-select" id="category_id" required>
+                                <option value="">Loading categories...</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="supplier_id" class="form-label">Supplier</label>
+                            <select class="form-select" id="supplier_id" required>
+                                <option value="">Loading suppliers...</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2 mb-3">
+                            <label for="quantity" class="form-label">Quantity</label>
+                            <input type="number" class="form-control" id="quantity" min="0" required>
+                        </div>
+
+                        <div class="col-md-2 mb-3">
+                            <label for="min_stock" class="form-label">Min Stock</label>
+                            <input type="number" class="form-control" id="min_stock" min="0" value="5" required>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submitProductBtn" class="btn btn-primary">
+                        Add Product
+                    </button>
+
+                    <button type="button" id="cancelEditBtn" class="btn btn-secondary ms-2 d-none">
+                        Cancel Edit
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <div class="row align-items-center g-2">
+                    <div class="col-md-4">
+                        <h5 class="mb-0">Products</h5>
+                    </div>
+
+                    <div class="col-md-5">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            class="form-control" 
+                            placeholder="Search by name, SKU, category, supplier..."
+                        >
+                    </div>
+
+                    <div class="col-md-3 text-md-end">
+                        <small class="text-muted" id="productsCountText">
+                            Showing 0 products
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>SKU</th>
+                                <th>Category</th>
+                                <th>Supplier</th>
+                                <th>Quantity</th>
+                                <th>Min Stock</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="productsTableBody">
+                            <tr>
+                                <td colspan="10" class="text-center">Loading products...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="alertBox"></div>
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Stock Movement History</h5>
+            </div>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white">
-            <h5 id="formTitle" class="mb-0">Add New Product</h5>
-        </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Product</th>
+                                <th>SKU</th>
+                                <th>Type</th>
+                                <th>Quantity</th>
+                                <th>Note</th>
+                            </tr>
+                        </thead>
 
-        <div class="card-body">
-            <form id="addProductForm">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="name" class="form-label">Product Name</label>
-                        <input type="text" class="form-control" id="name" required>
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label for="sku" class="form-label">SKU</label>
-                        <input type="text" class="form-control" id="sku" required>
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label for="price" class="form-label">Price</label>
-                        <input type="number" class="form-control" id="price" step="0.01" min="0" required>
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label for="category_id" class="form-label">Category</label>
-                        <select class="form-select" id="category_id" required>
-                            <option value="">Loading categories...</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label for="supplier_id" class="form-label">Supplier</label>
-                        <select class="form-select" id="supplier_id" required>
-                            <option value="">Loading suppliers...</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-2 mb-3">
-                        <label for="quantity" class="form-label">Quantity</label>
-                        <input type="number" class="form-control" id="quantity" min="0" required>
-                    </div>
-
-                    <div class="col-md-2 mb-3">
-                        <label for="min_stock" class="form-label">Min Stock</label>
-                        <input type="number" class="form-control" id="min_stock" min="0" value="5" required>
-                    </div>
-
-                    <div class="col-md-12 mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" rows="2"></textarea>
-                    </div>
+                        <tbody id="movementsTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center">Loading stock movements...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-
-                <button type="submit" id="submitProductBtn" class="btn btn-dark">
-                Add Product
-                </button>
-
-                <button type="button" id="cancelEditBtn" class="btn btn-secondary ms-2 d-none">
-                 Cancel Edit
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <div class="card-header bg-white">
-    <div class="row align-items-center g-2">
-        <div class="col-md-4">
-            <h5 class="mb-0">Products</h5>
+            </div>
         </div>
 
-        <div class="col-md-5">
-            <input 
-                type="text" 
-                id="searchInput" 
-                class="form-control" 
-                placeholder="Search by name, SKU, category, supplier..."
-            >
-        </div>
+    </main>
 
-        <div class="col-md-3 text-md-end">
-            <small class="text-muted" id="productsCountText">
-                Showing 0 products
-            </small>
-        </div>
-    </div>
 </div>
-
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped align-middle">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>SKU</th>
-                            <th>Category</th>
-                            <th>Supplier</th>
-                            <th>Quantity</th>
-                            <th>Min Stock</th>
-                            <th>Price</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productsTableBody">
-                        <tr>
-                            <td colspan="10" class="text-center">Loading products...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="card shadow-sm mt-4">
-    <div class="card-header bg-white">
-        <h5 class="mb-0">Stock Movement History</h5>
-    </div>
-
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-striped align-middle">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Product</th>
-                        <th>SKU</th>
-                        <th>Type</th>
-                        <th>Quantity</th>
-                        <th>Note</th>
-                    </tr>
-                </thead>
-                <tbody id="movementsTableBody">
-                    <tr>
-                        <td colspan="6" class="text-center">Loading stock movements...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-</main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/app.js"></script>
