@@ -76,9 +76,12 @@ The application allows an admin user to manage products, track stock movements, 
 ```text
 Email: admin@example.com
 Password: password
+```
 
-Project Structure
 
+## Project Structure
+
+```text
 inventory-system/
 │
 ├── backend/
@@ -113,6 +116,7 @@ inventory-system/
 │
 ├── .gitignore
 └── README.md
+```
 
 Installation & Setup
 
