@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadProducts();
     loadCategories();
     loadSuppliers();
+    loadStockMovements();
 
     const addProductForm = document.getElementById('addProductForm');
     addProductForm.addEventListener('submit', handleProductFormSubmit);
@@ -252,6 +253,7 @@ async function createStockMovement(productId, movementType) {
         );
 
         loadProducts();
+        loadStockMovements();
 
     } catch (error) {
         showError(error.message);
@@ -279,6 +281,7 @@ async function deleteProduct(productId) {
 
         showSuccess('Product deleted successfully.');
         loadProducts();
+        loadStockMovements();
 
     } catch (error) {
         showError(error.message);
@@ -361,6 +364,57 @@ function renderProductsTable(products) {
                         Delete
                     </button>
                 </td>
+            </tr>
+        `;
+
+        tableBody.innerHTML += row;
+    });
+}
+
+async function loadStockMovements() {
+    try {
+        const response = await fetch(STOCK_MOVEMENTS_API_URL);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch stock movements');
+        }
+
+        const data = await response.json();
+        renderStockMovementsTable(data.movements);
+
+    } catch (error) {
+        showError('Could not load stock movements.');
+        console.error(error);
+    }
+}
+
+function renderStockMovementsTable(movements) {
+    const tableBody = document.getElementById('movementsTableBody');
+
+    tableBody.innerHTML = '';
+
+    if (movements.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center">No stock movements found.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    movements.forEach(movement => {
+        const typeBadge = movement.movement_type === 'in'
+            ? '<span class="badge bg-success">IN</span>'
+            : '<span class="badge bg-warning text-dark">OUT</span>';
+
+        const row = `
+            <tr>
+                <td>${movement.created_at}</td>
+                <td>${movement.product_name}</td>
+                <td>${movement.sku}</td>
+                <td>${typeBadge}</td>
+                <td>${movement.quantity}</td>
+                <td>${movement.note ?? '-'}</td>
             </tr>
         `;
 
