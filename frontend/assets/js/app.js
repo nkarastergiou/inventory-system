@@ -5,6 +5,8 @@ const STOCK_MOVEMENTS_API_URL = 'http://localhost:8080/api/stock-movements';
 
 let currentProducts = [];
 let editingProductId = null;
+let categoryChart = null;
+let movementsChart = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     loadProducts();
@@ -51,6 +53,7 @@ async function loadProducts() {
         renderStats(currentProducts);
         renderLowStockAlerts(currentProducts);
         renderProductsTable(currentProducts);
+        renderCategoryChart(currentProducts);
 
     } catch (error) {
         showError('Could not load products from API.');
@@ -445,6 +448,7 @@ async function loadStockMovements() {
 
         const data = await response.json();
         renderStockMovementsTable(data.movements);
+        renderMovementsChart(data.movements);
 
     } catch (error) {
         showError('Could not load stock movements.');
@@ -486,6 +490,114 @@ function renderStockMovementsTable(movements) {
         `;
 
         tableBody.innerHTML += row;
+    });
+}
+
+function renderCategoryChart(products) {
+    if (typeof Chart === 'undefined') {
+        return;
+    }
+
+    const categoryCounts = {};
+
+    products.forEach(product => {
+        const category = product.category_name ?? 'Uncategorized';
+        categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+    });
+
+    const labels = Object.keys(categoryCounts);
+    const values = Object.values(categoryCounts);
+
+    const ctx = document.getElementById('categoryChart');
+
+    if (!ctx) {
+        return;
+    }
+
+    if (categoryChart) {
+        categoryChart.destroy();
+    }
+
+    categoryChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Products',
+                    data: values,
+                    backgroundColor: [
+                        '#2563eb',
+                        '#16a34a',
+                        '#f59e0b',
+                        '#dc2626',
+                        '#7c3aed',
+                        '#0891b2'
+                    ],
+                    borderRadius: 8
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderMovementsChart(movements) {
+    if (typeof Chart === 'undefined') {
+        return;
+    }
+
+    const stockInCount = movements.filter(movement => movement.movement_type === 'in').length;
+    const stockOutCount = movements.filter(movement => movement.movement_type === 'out').length;
+
+    const ctx = document.getElementById('movementsChart');
+
+    if (!ctx) {
+        return;
+    }
+
+    if (movementsChart) {
+        movementsChart.destroy();
+    }
+
+    movementsChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Stock In', 'Stock Out'],
+            datasets: [
+                {
+                    data: [stockInCount, stockOutCount],
+                    backgroundColor: ['#16a34a', '#f59e0b'],
+                    borderWidth: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
     });
 }
 

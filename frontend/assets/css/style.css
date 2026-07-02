@@ -377,3 +377,11 @@ html {
     margin: 4px 0 0;
     color: #6b7280;
 }
+.chart-card .card-body {
+    height: 320px;
+}
+
+.chart-card canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
