@@ -128,6 +128,15 @@ function renderProductsTable(products) {
 
     tableBody.innerHTML = '';
 
+    if (products.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="10" class="text-center">No products found.</td>
+            </tr>
+        `;
+        return;
+    }
+
     products.forEach(product => {
         const isLowStock = Number(product.quantity) <= Number(product.min_stock);
 
@@ -146,11 +155,46 @@ function renderProductsTable(products) {
                 <td>${product.min_stock}</td>
                 <td>€${product.price}</td>
                 <td>${statusBadge}</td>
+                <td>
+                    <button 
+                        class="btn btn-sm btn-outline-danger"
+                        onclick="deleteProduct(${product.id})"
+                    >
+                        Delete
+                    </button>
+                </td>
             </tr>
         `;
 
         tableBody.innerHTML += row;
     });
+}
+
+async function deleteProduct(productId) {
+    const confirmed = confirm('Are you sure you want to delete this product?');
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${PRODUCTS_API_URL}/${productId}`, {
+            method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to delete product');
+        }
+
+        showSuccess('Product deleted successfully.');
+        loadProducts();
+
+    } catch (error) {
+        showError(error.message);
+        console.error(error);
+    }
 }
 
 function showSuccess(message) {
