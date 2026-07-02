@@ -43,7 +43,7 @@
 
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-white">
-            <h5 class="mb-0">Add New Product</h5>
+            <h5 id="formTitle" class="mb-0">Add New Product</h5>
         </div>
 
         <div class="card-body">
@@ -94,8 +94,12 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-dark">
-                    Add Product
+                <button type="submit" id="submitProductBtn" class="btn btn-dark">
+                Add Product
+                </button>
+
+                <button type="button" id="cancelEditBtn" class="btn btn-secondary ms-2 d-none">
+                 Cancel Edit
                 </button>
             </form>
         </div>

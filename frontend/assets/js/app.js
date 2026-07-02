@@ -2,13 +2,19 @@ const PRODUCTS_API_URL = 'http://localhost:8080/api/products';
 const CATEGORIES_API_URL = 'http://localhost:8080/api/categories';
 const SUPPLIERS_API_URL = 'http://localhost:8080/api/suppliers';
 
+let currentProducts = [];
+let editingProductId = null;
+
 document.addEventListener('DOMContentLoaded', () => {
     loadProducts();
     loadCategories();
     loadSuppliers();
 
     const addProductForm = document.getElementById('addProductForm');
-    addProductForm.addEventListener('submit', handleAddProduct);
+    addProductForm.addEventListener('submit', handleProductFormSubmit);
+
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    cancelEditBtn.addEventListener('click', resetProductForm);
 });
 
 async function loadProducts() {
@@ -20,10 +26,10 @@ async function loadProducts() {
         }
 
         const data = await response.json();
-        const products = data.products;
+        currentProducts = data.products;
 
-        renderStats(products);
-        renderProductsTable(products);
+        renderStats(currentProducts);
+        renderProductsTable(currentProducts);
 
     } catch (error) {
         showError('Could not load products from API.');
@@ -71,7 +77,7 @@ async function loadSuppliers() {
     }
 }
 
-async function handleAddProduct(event) {
+async function handleProductFormSubmit(event) {
     event.preventDefault();
 
     const product = {
@@ -86,8 +92,16 @@ async function handleAddProduct(event) {
     };
 
     try {
-        const response = await fetch(PRODUCTS_API_URL, {
-            method: 'POST',
+        const isEditing = editingProductId !== null;
+
+        const url = isEditing
+            ? `${PRODUCTS_API_URL}/${editingProductId}`
+            : PRODUCTS_API_URL;
+
+        const method = isEditing ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+            method: method,
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -97,13 +111,79 @@ async function handleAddProduct(event) {
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.message || 'Failed to add product');
+            throw new Error(data.message || 'Failed to save product');
         }
 
-        showSuccess('Product added successfully.');
-        document.getElementById('addProductForm').reset();
-        document.getElementById('min_stock').value = 5;
+        showSuccess(isEditing ? 'Product updated successfully.' : 'Product added successfully.');
 
+        resetProductForm();
+        loadProducts();
+
+    } catch (error) {
+        showError(error.message);
+        console.error(error);
+    }
+}
+
+function editProduct(productId) {
+    const product = currentProducts.find(item => Number(item.id) === Number(productId));
+
+    if (!product) {
+        showError('Product not found.');
+        return;
+    }
+
+    editingProductId = product.id;
+
+    document.getElementById('name').value = product.name;
+    document.getElementById('sku').value = product.sku;
+    document.getElementById('description').value = product.description ?? '';
+    document.getElementById('category_id').value = product.category_id ?? '';
+    document.getElementById('supplier_id').value = product.supplier_id ?? '';
+    document.getElementById('quantity').value = product.quantity;
+    document.getElementById('min_stock').value = product.min_stock;
+    document.getElementById('price').value = product.price;
+
+    document.getElementById('formTitle').textContent = 'Edit Product';
+    document.getElementById('submitProductBtn').textContent = 'Update Product';
+    document.getElementById('cancelEditBtn').classList.remove('d-none');
+
+    document.getElementById('addProductForm').scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+    });
+}
+
+function resetProductForm() {
+    editingProductId = null;
+
+    document.getElementById('addProductForm').reset();
+    document.getElementById('min_stock').value = 5;
+
+    document.getElementById('formTitle').textContent = 'Add New Product';
+    document.getElementById('submitProductBtn').textContent = 'Add Product';
+    document.getElementById('cancelEditBtn').classList.add('d-none');
+}
+
+async function deleteProduct(productId) {
+    const confirmed = confirm('Are you sure you want to delete this product?');
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${PRODUCTS_API_URL}/${productId}`, {
+            method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to delete product');
+        }
+
+        showSuccess('Product deleted successfully.');
         loadProducts();
 
     } catch (error) {
@@ -157,6 +237,13 @@ function renderProductsTable(products) {
                 <td>${statusBadge}</td>
                 <td>
                     <button 
+                        class="btn btn-sm btn-outline-primary me-1"
+                        onclick="editProduct(${product.id})"
+                    >
+                        Edit
+                    </button>
+
+                    <button 
                         class="btn btn-sm btn-outline-danger"
                         onclick="deleteProduct(${product.id})"
                     >
@@ -168,33 +255,6 @@ function renderProductsTable(products) {
 
         tableBody.innerHTML += row;
     });
-}
-
-async function deleteProduct(productId) {
-    const confirmed = confirm('Are you sure you want to delete this product?');
-
-    if (!confirmed) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`${PRODUCTS_API_URL}/${productId}`, {
-            method: 'DELETE'
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Failed to delete product');
-        }
-
-        showSuccess('Product deleted successfully.');
-        loadProducts();
-
-    } catch (error) {
-        showError(error.message);
-        console.error(error);
-    }
 }
 
 function showSuccess(message) {

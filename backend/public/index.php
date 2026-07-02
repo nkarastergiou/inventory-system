@@ -74,6 +74,8 @@ $app->get('/api/products', function ($request, $response) {
         $sql = "
             SELECT 
                 p.id,
+                p.category_id,
+                p.supplier_id,
                 p.name,
                 p.sku,
                 p.description,
